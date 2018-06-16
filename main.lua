@@ -10,13 +10,22 @@ plane_14bis = {
 	x = WIDTH_SCREEN/2 - 64 / 2, 
 	y = HEIGHT_SCREEN - 64 / 2
 }
+
 function destroy14bis()
 	plane_14bis.src = "images/explosion.png"
 	plane_14bis.image = love.graphics.newImage(plane_14bis.src)
 	plane_14bis.width = 67
 	plane_14bis.height = 77
 
+	music_destruction:play()
+	changeMusic()
+	
 	END_GAME = true
+end
+
+function changeMusic()
+	music_environment:stop()
+	music_gameover:play()
 end
 
 function hasACollision(x1, y1, w1, h1 ,x2 , y2, w2, h2)
@@ -87,6 +96,13 @@ function love.load()
 	plane_14bis.image = love.graphics.newImage(plane_14bis.src)
 	meteor_img = love.graphics.newImage("images/meteor.png")
 
+	music_environment = love.audio.newSource("musics/environment.wav","static")
+	music_environment:setLooping(true)
+	music_environment:play()
+
+
+	music_destruction = love.audio.newSource("musics/destruction.wav","static")
+	music_gameover = love.audio.newSource("musics/game_over.wav","static")
 end
 
 function love.update(dt)
