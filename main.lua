@@ -8,7 +8,8 @@ plane_14bis = {
 	height = 63,
 	width = 55,
 	x = WIDTH_SCREEN/2 - 64 / 2, 
-	y = HEIGHT_SCREEN - 64 / 2
+	y = HEIGHT_SCREEN - 64 / 2,
+	shots = {}
 }
 
 function destroy14bis()
@@ -19,7 +20,7 @@ function destroy14bis()
 
 	music_destruction:play()
 	changeMusic()
-	
+
 	END_GAME = true
 end
 
@@ -78,13 +79,52 @@ function move14bis()
 		plane_14bis.x = plane_14bis.x + 1
 	end
 end
-function checkCollision()
+
+function shot()
+	local shot = {
+		x = plane_14bis.x + plane_14bis.width/2,
+		y = plane_14bis.y,
+		height = 16,
+		width = 16
+	}
+
+	table.insert(plane_14bis.shots, shot)
+	music_shot:play()
+end
+
+function moveShots()
+	for i = #plane_14bis.shots, 1, -1 do
+		if plane_14bis.shots[i].y > 0 then
+			plane_14bis.shots[i].y = plane_14bis.shots[i].y - 1
+		else
+			table.remove(plane_14bis.shots, i)
+		end
+	end
+end
+
+function checkCollisionWithPlane()
 	for k, meteor in pairs(meteors) do
 		if hasACollision(meteor.x, meteor.y, meteor.width, meteor.height,
 			plane_14bis.x, plane_14bis.y, plane_14bis.width, plane_14bis.height) then
 			destroy14bis()
 		end
 	end
+end
+function checkCollisionWithShots()
+	for i = #plane_14bis.shots, 1 , -1 do
+		for j = #meteors, 1 , -1 do
+			if hasACollision(plane_14bis.shots[i].x, plane_14bis.shots[i].y, plane_14bis.shots[i].width, plane_14bis.shots[i].height,
+				meteors[j].x, meteors[j].y, meteors[j].width, meteors[j].height) then
+				table.remove(plane_14bis.shots, i)
+				table.remove(meteors, j)
+				break
+			end
+		end
+	end
+end
+function checkCollision()
+	checkCollisionWithPlane()
+	checkCollisionWithShots()
 end
 function love.load()
 	love.window.setMode(WIDTH_SCREEN, HEIGHT_SCREEN, {resizable =false})
@@ -95,6 +135,7 @@ function love.load()
 	background = love.graphics.newImage("images/background.png")
 	plane_14bis.image = love.graphics.newImage(plane_14bis.src)
 	meteor_img = love.graphics.newImage("images/meteor.png")
+	shot_img = love.graphics.newImage("images/shot.png")
 
 	music_environment = love.audio.newSource("musics/environment.wav","static")
 	music_environment:setLooping(true)
@@ -102,6 +143,7 @@ function love.load()
 
 
 	music_destruction = love.audio.newSource("musics/destruction.wav","static")
+	music_shot = love.audio.newSource("musics/shot.wav","static")
 	music_gameover = love.audio.newSource("musics/game_over.wav","static")
 end
 
@@ -116,15 +158,28 @@ function love.update(dt)
 			createMeteor()
 		end
 		moveMeteor()
-		checkCollision()
+		moveShots()
+		checkCollision()		
 	end
 end
 
+function love.keypressed(key)
+	if key == "escape" then
+		love.event.quit()
+	elseif key == "space" then
+		if not END_GAME then
+			shot()
+		end
+	end
+end
 
 function love.draw()
 	love.graphics.draw(background, 0, 0)	
 	love.graphics.draw(plane_14bis.image, plane_14bis.x, plane_14bis.y)
 	for k,meteor in pairs(meteors) do
 		love.graphics.draw(meteor_img, meteor.x, meteor.y)
+	end
+	for k,shot in pairs(plane_14bis.shots) do
+		love.graphics.draw(shot_img, shot.x, shot.y)
 	end
 end
