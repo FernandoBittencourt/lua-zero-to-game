@@ -1,9 +1,12 @@
+WIDTH_SCREEN = 320
+HEIGHT_SCREEN = 480
+
 plane_14bis = {
 	src = "images/14bis.png",
 	height = 64,
 	width = 64,
-	x = 0, 
-	y = 0
+	x = WIDTH_SCREEN - 64 / 2, 
+	y = HEIGHT_SCREEN/2 - 64 / 2
 }
 
 function move14bis()
@@ -22,7 +25,7 @@ function move14bis()
 end
 
 function love.load()
-	love.window.setMode(320, 480, {resizable =false})
+	love.window.setMode(WIDTH_SCREEN, HEIGHT_SCREEN, {resizable =false})
 	love.window.setTitle("14 bis vs meteor")
 
 	background = love.graphics.newImage("images/background.png")
