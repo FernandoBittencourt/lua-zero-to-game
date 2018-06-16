@@ -1,6 +1,9 @@
 WIDTH_SCREEN = 320
 HEIGHT_SCREEN = 480
 MAX_METEOR = 12
+METEORS_COUNT = 0
+METEORS_TOTAL = 100
+WINNER = false
 END_GAME = false
 
 plane_14bis = {
@@ -117,15 +120,26 @@ function checkCollisionWithShots()
 				meteors[j].x, meteors[j].y, meteors[j].width, meteors[j].height) then
 				table.remove(plane_14bis.shots, i)
 				table.remove(meteors, j)
+				METEORS_COUNT = METEORS_COUNT + 1
 				break
 			end
 		end
 	end
 end
+
 function checkCollision()
 	checkCollisionWithPlane()
 	checkCollisionWithShots()
 end
+
+function isFinished()
+	if METEORS_COUNT >= METEORS_TOTAL then
+		WINNER = true
+		music_environment:stop()
+		music_winner:play()
+	end
+end
+
 function love.load()
 	love.window.setMode(WIDTH_SCREEN, HEIGHT_SCREEN, {resizable =false})
 	love.window.setTitle("14 bis vs meteor")
@@ -136,7 +150,9 @@ function love.load()
 	plane_14bis.image = love.graphics.newImage(plane_14bis.src)
 	meteor_img = love.graphics.newImage("images/meteor.png")
 	shot_img = love.graphics.newImage("images/shot.png")
+	winner_img = love.graphics.newImage("images/winner.png")
 	gameover_img = love.graphics.newImage("images/gameover.png")
+
 
 	music_environment = love.audio.newSource("musics/environment.wav","static")
 	music_environment:setLooping(true)
@@ -145,11 +161,12 @@ function love.load()
 
 	music_destruction = love.audio.newSource("musics/destruction.wav","static")
 	music_shot = love.audio.newSource("musics/shot.wav","static")
+	music_winner = love.audio.newSource("musics/winner.wav","static")
 	music_gameover = love.audio.newSource("musics/game_over.wav","static")
 end
 
 function love.update(dt)
-	if not END_GAME then
+	if not END_GAME and not WINNER then
 		if love.keyboard.isDown('w','a','s','d') then
 			move14bis()
 		end
@@ -160,7 +177,8 @@ function love.update(dt)
 		end
 		moveMeteor()
 		moveShots()
-		checkCollision()		
+		checkCollision()
+		isFinished()	
 	end
 end
 
@@ -177,11 +195,17 @@ end
 function love.draw()
 	love.graphics.draw(background, 0, 0)	
 	love.graphics.draw(plane_14bis.image, plane_14bis.x, plane_14bis.y)
+
+	love.graphics.print("Meteors: "..METEORS_TOTAL - METEORS_COUNT, 0 ,0)
+
 	for k,meteor in pairs(meteors) do
 		love.graphics.draw(meteor_img, meteor.x, meteor.y)
 	end
 	for k,shot in pairs(plane_14bis.shots) do
 		love.graphics.draw(shot_img, shot.x, shot.y)
+	end
+	if WINNER then
+		love.graphics.draw(winner_img, WIDTH_SCREEN/2 - gameover_img:getWidth()/2, HEIGHT_SCREEN/2 - gameover_img:getHeight()/2)
 	end
 	if END_GAME then
 		love.graphics.draw(gameover_img, WIDTH_SCREEN/2 - gameover_img:getWidth()/2, HEIGHT_SCREEN/2 - gameover_img:getHeight()/2)
