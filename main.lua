@@ -1,14 +1,30 @@
 WIDTH_SCREEN = 320
 HEIGHT_SCREEN = 480
 MAX_METEOR = 12
+END_GAME = false
 
 plane_14bis = {
 	src = "images/14bis.png",
-	height = 64,
-	width = 64,
+	height = 63,
+	width = 55,
 	x = WIDTH_SCREEN/2 - 64 / 2, 
 	y = HEIGHT_SCREEN - 64 / 2
 }
+function destroy14bis()
+	plane_14bis.src = "images/explosion.png"
+	plane_14bis.image = love.graphics.newImage(plane_14bis.src)
+	plane_14bis.width = 67
+	plane_14bis.height = 77
+
+	END_GAME = true
+end
+
+function hasACollision(x1, y1, w1, h1 ,x2 , y2, w2, h2)
+	return x2 < x1 + w1 and
+	 x1< x2 + w2 and
+	 y1 < y2 + h2 and
+	 y2 < y1 + h1
+end
 
 meteors = {}
 
@@ -16,6 +32,8 @@ function createMeteor()
 	meteor = {
 		x = math.random(WIDTH_SCREEN),
 		y = -70,
+		height = 44,
+		width = 50,
 		weight = math.random(3),
 		horizontal_displacement = math.random(-1,1)
 	}
@@ -51,7 +69,14 @@ function move14bis()
 		plane_14bis.x = plane_14bis.x + 1
 	end
 end
-
+function checkCollision()
+	for k, meteor in pairs(meteors) do
+		if hasACollision(meteor.x, meteor.y, meteor.width, meteor.height,
+			plane_14bis.x, plane_14bis.y, plane_14bis.width, plane_14bis.height) then
+			destroy14bis()
+		end
+	end
+end
 function love.load()
 	love.window.setMode(WIDTH_SCREEN, HEIGHT_SCREEN, {resizable =false})
 	love.window.setTitle("14 bis vs meteor")
@@ -65,16 +90,20 @@ function love.load()
 end
 
 function love.update(dt)
-	if love.keyboard.isDown('w','a','s','d') then
-		move14bis()
-	end
+	if not END_GAME then
+		if love.keyboard.isDown('w','a','s','d') then
+			move14bis()
+		end
 
-	removeMeteors()
-	if #meteors < MAX_METEOR then
-		createMeteor()
+		removeMeteors()
+		if #meteors < MAX_METEOR then
+			createMeteor()
+		end
+		moveMeteor()
+		checkCollision()
 	end
-	moveMeteor()
 end
+
 
 function love.draw()
 	love.graphics.draw(background, 0, 0)	
