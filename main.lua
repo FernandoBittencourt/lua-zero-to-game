@@ -136,6 +136,7 @@ function love.load()
 	plane_14bis.image = love.graphics.newImage(plane_14bis.src)
 	meteor_img = love.graphics.newImage("images/meteor.png")
 	shot_img = love.graphics.newImage("images/shot.png")
+	gameover_img = love.graphics.newImage("images/gameover.png")
 
 	music_environment = love.audio.newSource("musics/environment.wav","static")
 	music_environment:setLooping(true)
@@ -181,5 +182,8 @@ function love.draw()
 	end
 	for k,shot in pairs(plane_14bis.shots) do
 		love.graphics.draw(shot_img, shot.x, shot.y)
+	end
+	if END_GAME then
+		love.graphics.draw(gameover_img, WIDTH_SCREEN/2 - gameover_img:getWidth()/2, HEIGHT_SCREEN/2 - gameover_img:getHeight()/2)
 	end
 end
